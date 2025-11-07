@@ -1,4 +1,4 @@
-import 'package:easy_travel/features/flota365/flota365_module.dart';
+import 'package:easy_travel/features/flota365/presentation/app/flota365_module.dart';
 import 'package:flutter/material.dart';
 
 void main() {
