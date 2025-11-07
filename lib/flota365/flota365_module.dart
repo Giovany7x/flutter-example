@@ -1,0 +1,144 @@
+import 'package:easy_travel/flota365/data/fleet_repository.dart';
+import 'package:easy_travel/flota365/domain/models/fleet_route.dart';
+import 'package:easy_travel/flota365/presentation/pages/dashboard/check_in_page.dart';
+import 'package:easy_travel/flota365/presentation/pages/dashboard/check_out_page.dart';
+import 'package:easy_travel/flota365/presentation/pages/dashboard/driver_dashboard_page.dart';
+import 'package:easy_travel/flota365/presentation/pages/dashboard/trip_history_page.dart';
+import 'package:easy_travel/flota365/presentation/pages/evidence/upload_evidence_page.dart';
+import 'package:easy_travel/flota365/presentation/pages/login/driver_login_page.dart';
+import 'package:easy_travel/flota365/presentation/pages/login/login_selection_page.dart';
+import 'package:easy_travel/flota365/presentation/pages/login/manager_login_page.dart';
+import 'package:easy_travel/flota365/presentation/pages/login/register_driver_page.dart';
+import 'package:easy_travel/flota365/presentation/pages/login/register_manager_page.dart';
+import 'package:easy_travel/flota365/presentation/pages/login/welcome_page.dart';
+import 'package:easy_travel/flota365/presentation/pages/routes/route_detail_page.dart';
+import 'package:easy_travel/flota365/presentation/pages/dashboard/routes_overview_page.dart';
+import 'package:easy_travel/flota365/presentation/routes.dart';
+import 'package:flutter/material.dart';
+
+/// Widget raíz del módulo Flota365.
+///
+/// Este widget envuelve todas las pantallas nuevas y expone un `Navigator`
+/// independiente que puedes montar desde `main.dart` o cualquier otra parte
+/// de tu aplicación principal.
+class Flota365Module extends StatelessWidget {
+  /// Repositorio que provee la información mostrada en las pantallas.
+  final FleetRepository repository;
+
+  Flota365Module({
+    super.key,
+    FleetRepository? repository,
+  }) : repository = repository ?? FleetRepository.instance;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Flota365',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0C7EE8)),
+        useMaterial3: true,
+      ),
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case Flota365Routes.welcome:
+            return MaterialPageRoute(
+              builder: (_) => WelcomePage(onStart: () {
+                Navigator.of(_).pushNamed(Flota365Routes.loginSelection);
+              }),
+            );
+          case Flota365Routes.loginSelection:
+            return MaterialPageRoute(
+              builder: (_) => LoginSelectionPage(onNavigate: (route) {
+                Navigator.of(_).pushNamed(route);
+              }),
+            );
+          case Flota365Routes.loginDriver:
+            return MaterialPageRoute(
+              builder: (_) => DriverLoginPage(
+                onLoginSuccess: () {
+                  Navigator.of(_).pushReplacementNamed(Flota365Routes.dashboard);
+                },
+              ),
+            );
+          case Flota365Routes.loginManager:
+            return MaterialPageRoute(
+              builder: (_) => ManagerLoginPage(onBackToSelection: () {
+                Navigator.of(_).pop();
+              }),
+            );
+          case Flota365Routes.registerDriver:
+            return MaterialPageRoute(
+              builder: (_) => RegisterDriverPage(
+                onRegister: () => Navigator.of(_)
+                    .pushReplacementNamed(Flota365Routes.dashboard),
+              ),
+            );
+          case Flota365Routes.registerManager:
+            return MaterialPageRoute(
+              builder: (_) => RegisterManagerPage(
+                onRegister: () => Navigator.of(_).popUntil(
+                  (route) => route.settings.name == Flota365Routes.loginSelection,
+                ),
+              ),
+            );
+          case Flota365Routes.dashboard:
+            return MaterialPageRoute(
+              builder: (_) => DriverDashboardPage(
+                repository: repository,
+                onOpenRoutes: () => Navigator.of(_).pushNamed(Flota365Routes.routes),
+                onOpenCheckIn: () => Navigator.of(_).pushNamed(Flota365Routes.checkIn),
+                onOpenCheckOut: () => Navigator.of(_).pushNamed(Flota365Routes.checkOut),
+                onOpenEvidence: () =>
+                    Navigator.of(_).pushNamed(Flota365Routes.uploadEvidence),
+                onOpenHistory: () =>
+                    Navigator.of(_).pushNamed(Flota365Routes.tripHistory),
+              ),
+            );
+          case Flota365Routes.checkIn:
+            return MaterialPageRoute(
+              builder: (_) => CheckInPage(onCompleted: () => Navigator.of(_).pop()),
+            );
+          case Flota365Routes.checkOut:
+            return MaterialPageRoute(
+              builder: (_) =>
+                  CheckOutPage(onCompleted: () => Navigator.of(_).pop()),
+            );
+          case Flota365Routes.routes:
+            return MaterialPageRoute(
+              builder: (_) => RoutesOverviewPage(
+                repository: repository,
+                onRouteSelected: (route) => Navigator.of(_).pushNamed(
+                  Flota365Routes.routeDetail,
+                  arguments: route,
+                ),
+              ),
+            );
+          case Flota365Routes.routeDetail:
+            final route = settings.arguments as FleetRoute? ??
+                repository.getRoutesForDriver(repository.demoDriver.id).first;
+            return MaterialPageRoute(
+              builder: (_) => RouteDetailPage(route: route),
+            );
+          case Flota365Routes.uploadEvidence:
+            return MaterialPageRoute(
+              builder: (_) => UploadEvidencePage(repository: repository),
+            );
+          case Flota365Routes.tripHistory:
+            return MaterialPageRoute(
+              builder: (_) => TripHistoryPage(repository: repository),
+            );
+          default:
+            return MaterialPageRoute(
+              builder: (_) => Scaffold(
+                body: Center(
+                  child: Text('Ruta desconocida: ${settings.name}'),
+                ),
+              ),
+            );
+        }
+      },
+    );
+  }
+}
+
