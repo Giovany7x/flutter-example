@@ -104,7 +104,7 @@ class FleetRepository {
             name: 'Ruta no encontrada',
             origin: 'Desconocido',
             destination: 'Desconocido',
-            stops: [],
+            stops: const [],
             schedule: '---',
             status: 'Sin datos',
             completion: 0,
