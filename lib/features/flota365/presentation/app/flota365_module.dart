@@ -67,11 +67,11 @@ class Flota365Module extends StatelessWidget {
                 return MaterialPageRoute(
                   builder: (context) => DriverLoginPage(
                     onLoginSuccess: () async {
-                      await context
-                          .read<DriverSessionCubit>()
-                          .signInDemoDriver();
-                      if (!context.mounted) return;
-                      Navigator.of(context)
+                      final navigator = Navigator.of(context);
+                      final sessionCubit =
+                          context.read<DriverSessionCubit>();
+                      await sessionCubit.signInDemoDriver();
+                      navigator
                           .pushReplacementNamed(Flota365Routes.dashboard);
                     },
                   ),
@@ -98,11 +98,11 @@ class Flota365Module extends StatelessWidget {
                 return MaterialPageRoute(
                   builder: (context) => RegisterDriverPage(
                     onRegister: () async {
-                      await context
-                          .read<DriverSessionCubit>()
-                          .signInDemoDriver();
-                      if (!context.mounted) return;
-                      Navigator.of(context)
+                      final navigator = Navigator.of(context);
+                      final sessionCubit =
+                          context.read<DriverSessionCubit>();
+                      await sessionCubit.signInDemoDriver();
+                      navigator
                           .pushReplacementNamed(Flota365Routes.dashboard);
                     },
                   ),

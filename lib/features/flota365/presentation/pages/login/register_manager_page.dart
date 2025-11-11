@@ -46,7 +46,7 @@ class _RegisterManagerPageState extends State<RegisterManagerPage> {
               const SizedBox(height: 12),
               const _LabeledField(label: 'Rol dentro de la empresa'),
               const SizedBox(height: 24),
-              FilledButton(
+              ElevatedButton(
                 onPressed: _submit,
                 child: const Text('Crear cuenta'),
               ),
