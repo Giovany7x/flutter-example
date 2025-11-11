@@ -1,6 +1,10 @@
 import 'package:easy_travel/features/flota365/domain/models/driver_profile.dart';
+import 'package:easy_travel/features/flota365/domain/models/driver_status.dart';
 import 'package:easy_travel/features/flota365/domain/models/evidence_item.dart';
+import 'package:easy_travel/features/flota365/domain/models/evidence_submission.dart';
 import 'package:easy_travel/features/flota365/domain/models/fleet_route.dart';
+import 'package:easy_travel/features/flota365/domain/models/performance_snapshot.dart';
+import 'package:easy_travel/features/flota365/domain/models/summary_metric.dart';
 import 'package:easy_travel/features/flota365/domain/models/trip_record.dart';
 
 /// Repositorio en memoria que imita la respuesta del backend.
@@ -97,6 +101,111 @@ class FleetRepository {
   /// Devuelve la lista de rutas de un conductor.
   List<FleetRoute> getRoutesForDriver(String driverId) => _routes;
 
+  /// Estado en tiempo real de los conductores (vista del gestor).
+  final List<DriverStatus> _teamStatus = const [
+    DriverStatus(
+      id: 'driver-001',
+      name: 'María F. Pérez',
+      currentRoute: 'Ruta 27 - A05',
+      progress: 0.72,
+      statusLabel: 'En curso',
+      lastCheckpoint: 'Caseta de seguridad',
+      eta: '09:40',
+    ),
+    DriverStatus(
+      id: 'driver-002',
+      name: 'Luis Hernández',
+      currentRoute: 'Ruta Express - B12',
+      progress: 0.18,
+      statusLabel: 'Retraso leve',
+      lastCheckpoint: 'Terminal de carga',
+      eta: '12:05',
+      requiresAssistance: true,
+    ),
+    DriverStatus(
+      id: 'driver-003',
+      name: 'Andrea Gómez',
+      currentRoute: 'Ruta 14 - Centro',
+      progress: 1.0,
+      statusLabel: 'Completada',
+      lastCheckpoint: 'Entrega final registrada',
+    ),
+  ];
+
+  /// Indicadores resumidos para el dashboard de gestores.
+  final List<SummaryMetric> _managerMetrics = const [
+    SummaryMetric(
+      id: 'kpi-compliance',
+      title: 'Cumplimiento',
+      value: '92%',
+      variation: 4.2,
+      trend: MetricTrend.up,
+      description: 'Rutas completadas sin incidentes en la última semana.',
+    ),
+    SummaryMetric(
+      id: 'kpi-incidents',
+      title: 'Incidencias',
+      value: '3',
+      variation: -1.0,
+      trend: MetricTrend.down,
+      description: 'Reportes críticos recibidos durante la operación.',
+    ),
+    SummaryMetric(
+      id: 'kpi-satisfaction',
+      title: 'Satisfacción',
+      value: '4.7/5',
+      variation: 0.3,
+      trend: MetricTrend.up,
+      description: 'Promedio de evaluación de clientes y destinatarios.',
+    ),
+  ];
+
+  /// Rendimiento semanal para mostrar en gráficas simples.
+  final List<PerformanceSnapshot> _performanceHistory = const [
+    PerformanceSnapshot(
+      period: 'Semana 21',
+      compliance: 0.87,
+      incidentsRate: 0.06,
+      averageRating: 4.5,
+    ),
+    PerformanceSnapshot(
+      period: 'Semana 22',
+      compliance: 0.9,
+      incidentsRate: 0.05,
+      averageRating: 4.6,
+    ),
+    PerformanceSnapshot(
+      period: 'Semana 23',
+      compliance: 0.92,
+      incidentsRate: 0.04,
+      averageRating: 4.7,
+    ),
+  ];
+
+  /// Evidencias enviadas que aún esperan revisión por parte de un gestor.
+  final List<EvidenceSubmission> _pendingSubmissions = [
+    EvidenceSubmission(
+      template: const EvidenceItem(
+        id: 'evidence-odometer',
+        title: 'Foto del odómetro',
+        description: 'Lectura previa a la salida.',
+      ),
+      driverName: 'María F. Pérez',
+      routeName: 'Ruta 27 - A05',
+      submittedAt: 'Hoy • 05:20',
+    ),
+    EvidenceSubmission(
+      template: const EvidenceItem(
+        id: 'evidence-delivery',
+        title: 'Entrega firmada',
+        description: 'Documento con firma digital del cliente.',
+      ),
+      driverName: 'Luis Hernández',
+      routeName: 'Ruta Express - B12',
+      submittedAt: 'Ayer • 18:40',
+    ),
+  ];
+
   /// Busca una ruta específica por su identificador.
   FleetRoute? findRouteById(String id) =>
       _routes.firstWhere((route) => route.id == id, orElse: () => const FleetRoute(
@@ -123,4 +232,19 @@ class FleetRepository {
 
   /// Lista los viajes finalizados para mostrar en el historial.
   List<TripRecord> getTripHistory(String driverId) => _history;
+
+  /// Devuelve el estado del equipo para la vista del gestor.
+  List<DriverStatus> getTeamStatus() => List<DriverStatus>.unmodifiable(_teamStatus);
+
+  /// Devuelve los indicadores resumidos del gestor.
+  List<SummaryMetric> getManagerMetrics() =>
+      List<SummaryMetric>.unmodifiable(_managerMetrics);
+
+  /// Histórico de rendimiento para alimentar gráficas sencillas.
+  List<PerformanceSnapshot> getPerformanceHistory() =>
+      List<PerformanceSnapshot>.unmodifiable(_performanceHistory);
+
+  /// Evidencias subidas que aún no han sido aprobadas.
+  List<EvidenceSubmission> getPendingEvidenceSubmissions() =>
+      List<EvidenceSubmission>.unmodifiable(_pendingSubmissions);
 }
