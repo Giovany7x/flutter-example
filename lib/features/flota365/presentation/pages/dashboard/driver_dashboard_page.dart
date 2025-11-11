@@ -527,6 +527,158 @@ class DriverDashboardPage extends StatelessWidget {
   }
 }
 
+void _handleQuickMenuSelection(
+  BuildContext context,
+  _DriverQuickMenuOption option, {
+  required VoidCallback onOpenCheckIn,
+  required VoidCallback onOpenCheckOut,
+  required VoidCallback onOpenRoutes,
+  required VoidCallback onOpenNotifications,
+  required VoidCallback onOpenEvidence,
+  required VoidCallback onOpenHistory,
+  required VoidCallback onSignOut,
+  required VoidCallback onShowSupport,
+  required VoidCallback onShowProfile,
+}) {
+  switch (option) {
+    case _DriverQuickMenuOption.dashboard:
+      // No navigation is required because the usuario ya está en el dashboard.
+      break;
+    case _DriverQuickMenuOption.profile:
+      onShowProfile();
+      break;
+    case _DriverQuickMenuOption.checkIn:
+      onOpenCheckIn();
+      break;
+    case _DriverQuickMenuOption.checkOut:
+      onOpenCheckOut();
+      break;
+    case _DriverQuickMenuOption.routes:
+      onOpenRoutes();
+      break;
+    case _DriverQuickMenuOption.notifications:
+      onOpenNotifications();
+      break;
+    case _DriverQuickMenuOption.evidence:
+      onOpenEvidence();
+      break;
+    case _DriverQuickMenuOption.history:
+      onOpenHistory();
+      break;
+    case _DriverQuickMenuOption.support:
+      onShowSupport();
+      break;
+    case _DriverQuickMenuOption.signOut:
+      onSignOut();
+      break;
+  }
+}
+
+class _DriverQuickMenuButton extends StatelessWidget {
+  final ValueChanged<_DriverQuickMenuOption> onSelected;
+
+  const _DriverQuickMenuButton({
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<_DriverQuickMenuOption>(
+      tooltip: 'Abrir menú de navegación rápida',
+      icon: const Icon(Icons.more_vert_rounded),
+      onSelected: onSelected,
+      itemBuilder: (context) => [
+        _DriverQuickMenuItem(
+          option: _DriverQuickMenuOption.dashboard,
+          icon: Icons.dashboard_customize_rounded,
+          label: 'Dashboard',
+        ),
+        _DriverQuickMenuItem(
+          option: _DriverQuickMenuOption.profile,
+          icon: Icons.person_rounded,
+          label: 'Perfil',
+        ),
+        _DriverQuickMenuItem(
+          option: _DriverQuickMenuOption.checkIn,
+          icon: Icons.login_rounded,
+          label: 'Check-In',
+        ),
+        _DriverQuickMenuItem(
+          option: _DriverQuickMenuOption.checkOut,
+          icon: Icons.logout_rounded,
+          label: 'Check-Out',
+        ),
+        _DriverQuickMenuItem(
+          option: _DriverQuickMenuOption.routes,
+          icon: Icons.alt_route_rounded,
+          label: 'Mis rutas',
+        ),
+        _DriverQuickMenuItem(
+          option: _DriverQuickMenuOption.notifications,
+          icon: Icons.notifications_active_rounded,
+          label: 'Notificaciones',
+        ),
+        _DriverQuickMenuItem(
+          option: _DriverQuickMenuOption.evidence,
+          icon: Icons.verified_outlined,
+          label: 'Subir evidencia',
+        ),
+        _DriverQuickMenuItem(
+          option: _DriverQuickMenuOption.history,
+          icon: Icons.history_rounded,
+          label: 'Historial',
+        ),
+        _DriverQuickMenuItem(
+          option: _DriverQuickMenuOption.support,
+          icon: Icons.support_agent_rounded,
+          label: 'Soporte',
+        ),
+        const PopupMenuDivider(),
+        _DriverQuickMenuItem(
+          option: _DriverQuickMenuOption.signOut,
+          icon: Icons.exit_to_app_rounded,
+          label: 'Cerrar sesión',
+        ),
+      ],
+    );
+  }
+}
+
+class _DriverQuickMenuItem extends PopupMenuItem<_DriverQuickMenuOption> {
+  _DriverQuickMenuItem({
+    required _DriverQuickMenuOption option,
+    required IconData icon,
+    required String label,
+  }) : super(
+          value: option,
+          child: Row(
+            children: [
+              Icon(icon, size: 20),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
+            ],
+          ),
+        );
+}
+
+enum _DriverQuickMenuOption {
+  dashboard,
+  profile,
+  checkIn,
+  checkOut,
+  routes,
+  notifications,
+  evidence,
+  history,
+  support,
+  signOut,
+}
+
 /// Cabecera con el saludo personalizado y el número de licencia.
 class _DashboardHeader extends StatelessWidget {
   final String driverName;
