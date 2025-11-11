@@ -12,6 +12,10 @@ class Flota365Routes {
   static const String registerDriver = '/register-driver';
   static const String registerManager = '/register-manager';
   static const String dashboard = '/dashboard';
+  static const String managerDashboard = '/manager-dashboard';
+  static const String managerTeam = '/manager-team';
+  static const String managerEvidence = '/manager-evidence';
+  static const String managerReports = '/manager-reports';
   static const String checkIn = '/check-in';
   static const String checkOut = '/check-out';
   static const String routes = '/routes';

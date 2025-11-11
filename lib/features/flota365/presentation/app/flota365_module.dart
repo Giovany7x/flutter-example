@@ -13,6 +13,10 @@ import 'package:easy_travel/features/flota365/presentation/pages/login/manager_l
 import 'package:easy_travel/features/flota365/presentation/pages/login/register_driver_page.dart';
 import 'package:easy_travel/features/flota365/presentation/pages/login/register_manager_page.dart';
 import 'package:easy_travel/features/flota365/presentation/pages/login/welcome_page.dart';
+import 'package:easy_travel/features/flota365/presentation/pages/manager/manager_dashboard_page.dart';
+import 'package:easy_travel/features/flota365/presentation/pages/manager/manager_evidence_page.dart';
+import 'package:easy_travel/features/flota365/presentation/pages/manager/manager_reports_page.dart';
+import 'package:easy_travel/features/flota365/presentation/pages/manager/manager_team_page.dart';
 import 'package:easy_travel/features/flota365/presentation/pages/routes/route_detail_page.dart';
 import 'package:easy_travel/features/flota365/presentation/routes.dart';
 import 'package:flutter/material.dart';
@@ -74,10 +78,21 @@ class Flota365Module extends StatelessWidget {
                 );
               case Flota365Routes.loginManager:
                 return MaterialPageRoute(
-                  builder: (context) =>
-                      ManagerLoginPage(onBackToSelection: () {
-                    Navigator.of(context).pop();
-                  }),
+                  builder: (context) => ManagerLoginPage(
+                    onBackToSelection: () {
+                      Navigator.of(context).pop();
+                    },
+                    onLoginSuccess: () async {
+                      // Simula un pequeño retraso en la validación con el backend.
+                      await Future<void>.delayed(
+                        const Duration(milliseconds: 450),
+                      );
+                      if (!context.mounted) return;
+                      Navigator.of(context).pushReplacementNamed(
+                        Flota365Routes.managerDashboard,
+                      );
+                    },
+                  ),
                 );
               case Flota365Routes.registerDriver:
                 return MaterialPageRoute(
@@ -145,6 +160,38 @@ class Flota365Module extends StatelessWidget {
                       arguments: route,
                     ),
                   ),
+                );
+              case Flota365Routes.managerDashboard:
+                return MaterialPageRoute(
+                  builder: (context) => ManagerDashboardPage(
+                    repository: repository,
+                    onOpenTeam: () =>
+                        Navigator.of(context).pushNamed(Flota365Routes.managerTeam),
+                    onOpenEvidence: () => Navigator.of(context)
+                        .pushNamed(Flota365Routes.managerEvidence),
+                    onOpenReports: () => Navigator.of(context)
+                        .pushNamed(Flota365Routes.managerReports),
+                    onSignOut: () {
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                        Flota365Routes.welcome,
+                        (route) => false,
+                      );
+                    },
+                  ),
+                );
+              case Flota365Routes.managerTeam:
+                return MaterialPageRoute(
+                  builder: (context) => ManagerTeamPage(repository: repository),
+                );
+              case Flota365Routes.managerEvidence:
+                return MaterialPageRoute(
+                  builder: (context) =>
+                      ManagerEvidencePage(repository: repository),
+                );
+              case Flota365Routes.managerReports:
+                return MaterialPageRoute(
+                  builder: (context) =>
+                      ManagerReportsPage(repository: repository),
                 );
               case Flota365Routes.routeDetail:
                 final route = settings.arguments as FleetRoute? ??
