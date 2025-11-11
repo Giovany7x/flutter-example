@@ -1009,39 +1009,6 @@ class _EmptyStateMessage extends StatelessWidget {
               style: theme.textTheme.bodyMedium,
             ),
           ),
-          const SizedBox(height: 24),
-          Text(
-            'Flujo del conductor',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 12),
-          DriverFlowShowcase(
-            steps: flowSteps,
-            onStepSelected: (step) {
-              switch (step.title) {
-                case 'Dashboard':
-                  break;
-                case 'Check-In':
-                  onOpenCheckIn();
-                  break;
-                case 'Check-Out':
-                  onOpenCheckOut();
-                  break;
-                case 'Mis rutas':
-                  onOpenRoutes();
-                  break;
-                case 'Detalle de ruta':
-                  onOpenRoutes();
-                  break;
-                case 'Subir evidencias':
-                  onOpenEvidence();
-                  break;
-                case 'Historial':
-                  onOpenHistory();
-                  break;
-              }
-            },
-          ),
         ],
       ),
     );

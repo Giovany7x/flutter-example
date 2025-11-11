@@ -230,13 +230,13 @@ class Flota365Module extends StatelessWidget {
                   builder: (_) => ManagerDashboardPage(
                     repository: repository,
                     onOpenTeam: () =>
-                        Navigator.of(_).pushNamed(Flota365Routes.managerTeam),
+                        Navigator.of(context).pushNamed(Flota365Routes.managerTeam),
                     onOpenEvidence: () =>
-                        Navigator.of(_).pushNamed(Flota365Routes.managerEvidence),
+                        Navigator.of(context).pushNamed(Flota365Routes.managerEvidence),
                     onOpenReports: () =>
-                        Navigator.of(_).pushNamed(Flota365Routes.managerReports),
+                        Navigator.of(context).pushNamed(Flota365Routes.managerReports),
                     onSignOut: () {
-                      Navigator.of(_).pushNamedAndRemoveUntil(
+                      Navigator.of(context).pushNamedAndRemoveUntil(
                         Flota365Routes.welcome,
                         (route) => false,
                       );
