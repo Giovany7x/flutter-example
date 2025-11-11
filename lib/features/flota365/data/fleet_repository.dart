@@ -1,4 +1,5 @@
 import 'package:easy_travel/features/flota365/domain/models/driver_profile.dart';
+import 'package:easy_travel/features/flota365/domain/models/driver_notification.dart';
 import 'package:easy_travel/features/flota365/domain/models/driver_status.dart';
 import 'package:easy_travel/features/flota365/domain/models/evidence_item.dart';
 import 'package:easy_travel/features/flota365/domain/models/evidence_submission.dart';
@@ -98,8 +99,35 @@ class FleetRepository {
     ),
   ];
 
+  /// Notificaciones que el backend entregaría al conductor.
+  final List<DriverNotification> _notifications = const [
+    DriverNotification(
+      id: 'notification-001',
+      title: 'Nueva ruta asignada',
+      description: 'Tienes una ruta prioritaria para el turno de la tarde.',
+      timeAgo: 'Hace 5 min',
+      isCritical: true,
+    ),
+    DriverNotification(
+      id: 'notification-002',
+      title: 'Checklist pendiente',
+      description: 'Recuerda completar el check-in antes de las 06:00 hrs.',
+      timeAgo: 'Hace 20 min',
+    ),
+    DriverNotification(
+      id: 'notification-003',
+      title: 'Evidencia revisada',
+      description: 'Tu comprobante de combustible fue aprobado.',
+      timeAgo: 'Hace 1 h',
+    ),
+  ];
+
   /// Devuelve la lista de rutas de un conductor.
   List<FleetRoute> getRoutesForDriver(String driverId) => _routes;
+
+  /// Devuelve las notificaciones más recientes del conductor.
+  List<DriverNotification> getNotificationsForDriver(String driverId) =>
+      _notifications;
 
   /// Estado en tiempo real de los conductores (vista del gestor).
   final List<DriverStatus> _teamStatus = const [

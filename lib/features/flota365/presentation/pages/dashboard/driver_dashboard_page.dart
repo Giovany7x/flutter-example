@@ -23,6 +23,7 @@ class DriverDashboardPage extends StatelessWidget {
   final VoidCallback onOpenCheckOut;
   final VoidCallback onOpenEvidence;
   final VoidCallback onOpenHistory;
+  final VoidCallback onOpenNotifications;
   final VoidCallback onSignOut;
 
   const DriverDashboardPage({
@@ -33,6 +34,7 @@ class DriverDashboardPage extends StatelessWidget {
     required this.onOpenCheckOut,
     required this.onOpenEvidence,
     required this.onOpenHistory,
+    required this.onOpenNotifications,
     required this.onSignOut,
   });
 
@@ -77,6 +79,12 @@ class DriverDashboardPage extends StatelessWidget {
         icon: Icons.cloud_upload_rounded,
         color: const Color(0xFFF2994A),
         onTap: onOpenEvidence,
+      ),
+      _QuickActionData(
+        label: 'Notificaciones',
+        icon: Icons.notifications_active_rounded,
+        color: const Color(0xFF2D9CDB),
+        onTap: onOpenNotifications,
       ),
       _QuickActionData(
         label: 'Historial',
@@ -141,6 +149,10 @@ class DriverDashboardPage extends StatelessWidget {
           Navigator.of(context).pop();
           onOpenRoutes();
         },
+        onOpenNotifications: () {
+          Navigator.of(context).pop();
+          onOpenNotifications();
+        },
         onOpenEvidence: () {
           Navigator.of(context).pop();
           onOpenEvidence();
@@ -161,6 +173,15 @@ class DriverDashboardPage extends StatelessWidget {
         },
       ),
       appBar: AppBar(
+        leading: Builder(
+          builder: (context) {
+            return IconButton(
+              icon: const Icon(Icons.menu_rounded),
+              tooltip: 'Menú de navegación',
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            );
+          },
+        ),
         title: const Text('Dashboard de conductor'),
         actions: [
           IconButton(
