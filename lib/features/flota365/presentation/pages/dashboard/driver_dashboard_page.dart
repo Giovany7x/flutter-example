@@ -440,6 +440,7 @@ class DriverDashboardPage extends StatelessWidget {
   ) {
     showModalBottomSheet<void>(
       context: context,
+      showDragHandle: true,
       builder: (sheetContext) {
         return Padding(
           padding: const EdgeInsets.all(24),
@@ -470,6 +471,7 @@ class DriverDashboardPage extends StatelessWidget {
   void _showSupportSheet(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
+      showDragHandle: true,
       builder: (sheetContext) {
         return Padding(
           padding: const EdgeInsets.all(24),
@@ -768,6 +770,7 @@ class _RouteCarouselState extends State<_RouteCarousel> {
   void _showRouteQuickLook(BuildContext context, FleetRoute route) {
     showModalBottomSheet<void>(
       context: context,
+      showDragHandle: true,
       builder: (sheetContext) {
         return Padding(
           padding: const EdgeInsets.all(24),
@@ -810,7 +813,7 @@ class _RouteCarouselState extends State<_RouteCarousel> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: ElevatedButton.icon(
+                    child: FilledButton.icon(
                       onPressed: () {
                         Navigator.of(sheetContext).pop();
                         widget.onOpenCheckIn();
@@ -961,7 +964,7 @@ class _EvidenceReminderCard extends StatelessWidget {
                 const SizedBox(height: 12),
                 Align(
                   alignment: Alignment.bottomRight,
-                  child: ElevatedButton.icon(
+                  child: FilledButton.icon(
                     onPressed: onTap,
                     icon: const Icon(Icons.cloud_upload_rounded, size: 18),
                     label: const Text('Subir ahora'),
@@ -1005,6 +1008,39 @@ class _EmptyStateMessage extends StatelessWidget {
               message,
               style: theme.textTheme.bodyMedium,
             ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Flujo del conductor',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 12),
+          DriverFlowShowcase(
+            steps: flowSteps,
+            onStepSelected: (step) {
+              switch (step.title) {
+                case 'Dashboard':
+                  break;
+                case 'Check-In':
+                  onOpenCheckIn();
+                  break;
+                case 'Check-Out':
+                  onOpenCheckOut();
+                  break;
+                case 'Mis rutas':
+                  onOpenRoutes();
+                  break;
+                case 'Detalle de ruta':
+                  onOpenRoutes();
+                  break;
+                case 'Subir evidencias':
+                  onOpenEvidence();
+                  break;
+                case 'Historial':
+                  onOpenHistory();
+                  break;
+              }
+            },
           ),
         ],
       ),

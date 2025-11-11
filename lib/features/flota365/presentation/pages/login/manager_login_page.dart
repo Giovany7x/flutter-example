@@ -71,7 +71,7 @@ class _ManagerLoginPageState extends State<ManagerLoginPage> {
                     value == null || value.isEmpty ? 'Ingresa tu contraseña' : null,
               ),
               const SizedBox(height: 24),
-              ElevatedButton(
+              FilledButton(
                 onPressed: _isSubmitting ? null : _submit,
                 child: _isSubmitting
                     ? const SizedBox(

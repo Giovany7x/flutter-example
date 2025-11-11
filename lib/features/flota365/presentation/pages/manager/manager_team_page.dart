@@ -41,20 +41,13 @@ class _ManagerTeamPageState extends State<ManagerTeamPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Wrap(
-              spacing: 12,
-              children: [
-                ChoiceChip(
-                  label: const Text('Todos'),
-                  selected: !_showOnlyAlerts,
-                  onSelected: (_) => setState(() => _showOnlyAlerts = false),
-                ),
-                ChoiceChip(
-                  label: const Text('Solo alertas'),
-                  selected: _showOnlyAlerts,
-                  onSelected: (_) => setState(() => _showOnlyAlerts = true),
-                ),
+            SegmentedButton<bool>(
+              segments: const [
+                ButtonSegment(value: false, label: Text('Todos')),
+                ButtonSegment(value: true, label: Text('Solo alertas')),
               ],
+              selected: {_showOnlyAlerts},
+              onSelectionChanged: (value) => setState(() => _showOnlyAlerts = value.first),
             ),
             const SizedBox(height: 16),
             Expanded(

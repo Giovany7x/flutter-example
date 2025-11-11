@@ -83,12 +83,12 @@ class Flota365Module extends StatelessWidget {
                       Navigator.of(context).pop();
                     },
                     onLoginSuccess: () async {
-                      final navigator = Navigator.of(context);
                       // Simula un pequeño retraso en la validación con el backend.
                       await Future<void>.delayed(
                         const Duration(milliseconds: 450),
                       );
-                      navigator.pushReplacementNamed(
+                      if (!context.mounted) return;
+                      Navigator.of(context).pushReplacementNamed(
                         Flota365Routes.managerDashboard,
                       );
                     },

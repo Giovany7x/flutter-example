@@ -67,7 +67,7 @@ class EvidenceSubmissionCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: ElevatedButton.icon(
+                child: FilledButton.icon(
                   onPressed: onApprove,
                   icon: const Icon(Icons.check_circle_outline),
                   label: const Text('Aprobar'),
