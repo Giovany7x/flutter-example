@@ -17,6 +17,7 @@ import 'package:easy_travel/features/flota365/presentation/pages/manager/manager
 import 'package:easy_travel/features/flota365/presentation/pages/manager/manager_evidence_page.dart';
 import 'package:easy_travel/features/flota365/presentation/pages/manager/manager_reports_page.dart';
 import 'package:easy_travel/features/flota365/presentation/pages/manager/manager_team_page.dart';
+import 'package:easy_travel/features/flota365/presentation/pages/notifications/driver_notifications_page.dart';
 import 'package:easy_travel/features/flota365/presentation/pages/routes/route_detail_page.dart';
 import 'package:easy_travel/features/flota365/presentation/routes.dart';
 import 'package:flutter/material.dart';
@@ -130,6 +131,8 @@ class Flota365Module extends StatelessWidget {
                         .pushNamed(Flota365Routes.uploadEvidence),
                     onOpenHistory: () => Navigator.of(context)
                         .pushNamed(Flota365Routes.tripHistory),
+                    onOpenNotifications: () => Navigator.of(context)
+                        .pushNamed(Flota365Routes.notifications),
                     onSignOut: () {
                       context.read<DriverSessionCubit>().signOut();
                       Navigator.of(context).pushNamedAndRemoveUntil(
@@ -208,6 +211,11 @@ class Flota365Module extends StatelessWidget {
                 return MaterialPageRoute(
                   builder: (context) =>
                       TripHistoryPage(repository: repository),
+                );
+              case Flota365Routes.notifications:
+                return MaterialPageRoute(
+                  builder: (context) =>
+                      DriverNotificationsPage(repository: repository),
                 );
               default:
                 return MaterialPageRoute(

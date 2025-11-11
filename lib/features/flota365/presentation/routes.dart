@@ -22,4 +22,5 @@ class Flota365Routes {
   static const String routeDetail = '/route-detail';
   static const String uploadEvidence = '/upload-evidence';
   static const String tripHistory = '/trip-history';
+  static const String notifications = '/notifications';
 }
