@@ -1,6 +1,7 @@
 import 'package:easy_travel/features/flota365/data/fleet_repository.dart';
 import 'package:easy_travel/features/flota365/presentation/bloc/driver_session_cubit.dart';
 import 'package:easy_travel/features/flota365/presentation/widgets/dashboard_action_card.dart';
+import 'package:easy_travel/features/flota365/presentation/widgets/driver_flow_showcase.dart';
 import 'package:easy_travel/features/flota365/presentation/widgets/route_progress_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,6 +35,50 @@ class DriverDashboardPage extends StatelessWidget {
     final sessionState = context.watch<DriverSessionCubit>().state;
     final driver = sessionState.driver ?? repository.demoDriver;
     final routes = repository.getRoutesForDriver(driver.id);
+    final flowSteps = [
+      const DriverFlowStep(
+        title: 'Dashboard',
+        description: 'Resumen del día, ruta activa y accesos rápidos.',
+        icon: Icons.dashboard_outlined,
+        accentColor: Color(0xFF0C7EE8),
+      ),
+      const DriverFlowStep(
+        title: 'Check-In',
+        description: 'Completa la lista de verificación al iniciar tu turno.',
+        icon: Icons.login,
+        accentColor: Color(0xFF27AE60),
+      ),
+      const DriverFlowStep(
+        title: 'Check-Out',
+        description: 'Registra el cierre y estado del vehículo al terminar.',
+        icon: Icons.logout,
+        accentColor: Color(0xFFEB5757),
+      ),
+      const DriverFlowStep(
+        title: 'Mis rutas',
+        description: 'Consulta tus rutas asignadas y monitoréalas.',
+        icon: Icons.alt_route,
+        accentColor: Color(0xFF9B51E0),
+      ),
+      const DriverFlowStep(
+        title: 'Detalle de ruta',
+        description: 'Visualiza paradas, horarios y puntos críticos.',
+        icon: Icons.map_outlined,
+        accentColor: Color(0xFF2D9CDB),
+      ),
+      const DriverFlowStep(
+        title: 'Subir evidencias',
+        description: 'Envía fotografías y documentos requeridos.',
+        icon: Icons.cloud_upload_outlined,
+        accentColor: Color(0xFFF2994A),
+      ),
+      const DriverFlowStep(
+        title: 'Historial',
+        description: 'Revisa viajes completados y calificaciones.',
+        icon: Icons.history,
+        accentColor: Color(0xFF4F4F4F),
+      ),
+    ];
 
     return Scaffold(
       appBar: AppBar(
@@ -118,6 +163,39 @@ class DriverDashboardPage extends StatelessWidget {
             description: 'Revisa tus viajes completados y calificaciones.',
             icon: Icons.history,
             onTap: onOpenHistory,
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Flujo del conductor',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 12),
+          DriverFlowShowcase(
+            steps: flowSteps,
+            onStepSelected: (step) {
+              switch (step.title) {
+                case 'Dashboard':
+                  break;
+                case 'Check-In':
+                  onOpenCheckIn();
+                  break;
+                case 'Check-Out':
+                  onOpenCheckOut();
+                  break;
+                case 'Mis rutas':
+                  onOpenRoutes();
+                  break;
+                case 'Detalle de ruta':
+                  onOpenRoutes();
+                  break;
+                case 'Subir evidencias':
+                  onOpenEvidence();
+                  break;
+                case 'Historial':
+                  onOpenHistory();
+                  break;
+              }
+            },
           ),
         ],
       ),

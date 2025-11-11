@@ -14,6 +14,10 @@ import 'package:easy_travel/features/flota365/presentation/pages/login/register_
 import 'package:easy_travel/features/flota365/presentation/pages/login/register_manager_page.dart';
 import 'package:easy_travel/features/flota365/presentation/pages/login/welcome_page.dart';
 import 'package:easy_travel/features/flota365/presentation/pages/routes/route_detail_page.dart';
+import 'package:easy_travel/features/flota365/presentation/pages/manager/manager_dashboard_page.dart';
+import 'package:easy_travel/features/flota365/presentation/pages/manager/manager_evidence_page.dart';
+import 'package:easy_travel/features/flota365/presentation/pages/manager/manager_reports_page.dart';
+import 'package:easy_travel/features/flota365/presentation/pages/manager/manager_team_page.dart';
 import 'package:easy_travel/features/flota365/presentation/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -70,9 +74,18 @@ class Flota365Module extends StatelessWidget {
                 );
               case Flota365Routes.loginManager:
                 return MaterialPageRoute(
-                  builder: (_) => ManagerLoginPage(onBackToSelection: () {
-                    Navigator.of(_).pop();
-                  }),
+                  builder: (_) => ManagerLoginPage(
+                    onBackToSelection: () {
+                      Navigator.of(_).pop();
+                    },
+                    onLoginSuccess: () async {
+                      await Future<void>.delayed(const Duration(milliseconds: 450));
+                      if (!_.mounted) return;
+                      Navigator.of(_).pushReplacementNamed(
+                        Flota365Routes.managerDashboard,
+                      );
+                    },
+                  ),
                 );
               case Flota365Routes.registerDriver:
                 return MaterialPageRoute(
@@ -121,6 +134,36 @@ class Flota365Module extends StatelessWidget {
                 return MaterialPageRoute(
                   builder: (_) =>
                       CheckInPage(onCompleted: () => Navigator.of(_).pop()),
+                );
+              case Flota365Routes.managerDashboard:
+                return MaterialPageRoute(
+                  builder: (_) => ManagerDashboardPage(
+                    repository: repository,
+                    onOpenTeam: () =>
+                        Navigator.of(_).pushNamed(Flota365Routes.managerTeam),
+                    onOpenEvidence: () =>
+                        Navigator.of(_).pushNamed(Flota365Routes.managerEvidence),
+                    onOpenReports: () =>
+                        Navigator.of(_).pushNamed(Flota365Routes.managerReports),
+                    onSignOut: () {
+                      Navigator.of(_).pushNamedAndRemoveUntil(
+                        Flota365Routes.welcome,
+                        (route) => false,
+                      );
+                    },
+                  ),
+                );
+              case Flota365Routes.managerTeam:
+                return MaterialPageRoute(
+                  builder: (_) => ManagerTeamPage(repository: repository),
+                );
+              case Flota365Routes.managerEvidence:
+                return MaterialPageRoute(
+                  builder: (_) => ManagerEvidencePage(repository: repository),
+                );
+              case Flota365Routes.managerReports:
+                return MaterialPageRoute(
+                  builder: (_) => ManagerReportsPage(repository: repository),
                 );
               case Flota365Routes.checkOut:
                 return MaterialPageRoute(
