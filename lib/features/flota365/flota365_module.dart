@@ -52,22 +52,22 @@ class Flota365Module extends StatelessWidget {
               case Flota365Routes.welcome:
                 return MaterialPageRoute(
                   builder: (_) => WelcomePage(onStart: () {
-                    Navigator.of(_).pushNamed(Flota365Routes.loginSelection);
+                    Navigator.of(context).pushNamed(Flota365Routes.loginSelection);
                   }),
                 );
               case Flota365Routes.loginSelection:
                 return MaterialPageRoute(
                   builder: (_) => LoginSelectionPage(onNavigate: (route) {
-                    Navigator.of(_).pushNamed(route);
+                    Navigator.of(context).pushNamed(route);
                   }),
                 );
               case Flota365Routes.loginDriver:
                 return MaterialPageRoute(
                   builder: (_) => DriverLoginPage(
                     onLoginSuccess: () async {
-                      await _.read<DriverSessionCubit>().signInDemoDriver();
-                      if (!_.mounted) return;
-                      Navigator.of(_)
+                      await context.read<DriverSessionCubit>().signInDemoDriver();
+                      if (!context.mounted) return;
+                      Navigator.of(context)
                           .pushReplacementNamed(Flota365Routes.dashboard);
                     },
                   ),
@@ -91,9 +91,9 @@ class Flota365Module extends StatelessWidget {
                 return MaterialPageRoute(
                   builder: (_) => RegisterDriverPage(
                     onRegister: () async {
-                      await _.read<DriverSessionCubit>().signInDemoDriver();
-                      if (!_.mounted) return;
-                      Navigator.of(_)
+                      await context.read<DriverSessionCubit>().signInDemoDriver();
+                      if (!context.mounted) return;
+                      Navigator.of(context)
                           .pushReplacementNamed(Flota365Routes.dashboard);
                     },
                   ),
@@ -101,7 +101,7 @@ class Flota365Module extends StatelessWidget {
               case Flota365Routes.registerManager:
                 return MaterialPageRoute(
                   builder: (_) => RegisterManagerPage(
-                    onRegister: () => Navigator.of(_).popUntil(
+                    onRegister: () => Navigator.of(context).popUntil(
                       (route) => route.settings.name ==
                           Flota365Routes.loginSelection,
                     ),
@@ -112,18 +112,18 @@ class Flota365Module extends StatelessWidget {
                   builder: (_) => DriverDashboardPage(
                     repository: repository,
                     onOpenRoutes: () =>
-                        Navigator.of(_).pushNamed(Flota365Routes.routes),
+                        Navigator.of(context).pushNamed(Flota365Routes.routes),
                     onOpenCheckIn: () =>
-                        Navigator.of(_).pushNamed(Flota365Routes.checkIn),
+                        Navigator.of(context).pushNamed(Flota365Routes.checkIn),
                     onOpenCheckOut: () =>
-                        Navigator.of(_).pushNamed(Flota365Routes.checkOut),
-                    onOpenEvidence: () => Navigator.of(_)
+                        Navigator.of(context).pushNamed(Flota365Routes.checkOut),
+                    onOpenEvidence: () => Navigator.of(context)
                         .pushNamed(Flota365Routes.uploadEvidence),
-                    onOpenHistory: () => Navigator.of(_)
+                    onOpenHistory: () => Navigator.of(context)
                         .pushNamed(Flota365Routes.tripHistory),
                     onSignOut: () {
-                      _.read<DriverSessionCubit>().signOut();
-                      Navigator.of(_).pushNamedAndRemoveUntil(
+                      context.read<DriverSessionCubit>().signOut();
+                      Navigator.of(context).pushNamedAndRemoveUntil(
                         Flota365Routes.welcome,
                         (route) => false,
                       );
@@ -133,7 +133,67 @@ class Flota365Module extends StatelessWidget {
               case Flota365Routes.checkIn:
                 return MaterialPageRoute(
                   builder: (_) =>
-                      CheckInPage(onCompleted: () => Navigator.of(_).pop()),
+                      CheckInPage(onCompleted: () => Navigator.of(context).pop()),
+                );
+              case Flota365Routes.managerDashboard:
+                return MaterialPageRoute(
+                  builder: (_) => ManagerDashboardPage(
+                    repository: repository,
+                    onOpenTeam: () =>
+                        Navigator.of(context).pushNamed(Flota365Routes.managerTeam),
+                    onOpenEvidence: () =>
+                        Navigator.of(context).pushNamed(Flota365Routes.managerEvidence),
+                    onOpenReports: () =>
+                        Navigator.of(context).pushNamed(Flota365Routes.managerReports),
+                    onSignOut: () {
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                        Flota365Routes.welcome,
+                        (route) => false,
+                      );
+                    },
+                  ),
+                );
+              case Flota365Routes.managerTeam:
+                return MaterialPageRoute(
+                  builder: (_) => ManagerTeamPage(repository: repository),
+                );
+              case Flota365Routes.managerEvidence:
+                return MaterialPageRoute(
+                  builder: (_) => ManagerEvidencePage(repository: repository),
+                );
+              case Flota365Routes.managerReports:
+                return MaterialPageRoute(
+                  builder: (_) => ManagerReportsPage(repository: repository),
+                );
+              case Flota365Routes.managerDashboard:
+                return MaterialPageRoute(
+                  builder: (_) => ManagerDashboardPage(
+                    repository: repository,
+                    onOpenTeam: () =>
+                        Navigator.of(_).pushNamed(Flota365Routes.managerTeam),
+                    onOpenEvidence: () =>
+                        Navigator.of(_).pushNamed(Flota365Routes.managerEvidence),
+                    onOpenReports: () =>
+                        Navigator.of(_).pushNamed(Flota365Routes.managerReports),
+                    onSignOut: () {
+                      Navigator.of(_).pushNamedAndRemoveUntil(
+                        Flota365Routes.welcome,
+                        (route) => false,
+                      );
+                    },
+                  ),
+                );
+              case Flota365Routes.managerTeam:
+                return MaterialPageRoute(
+                  builder: (_) => ManagerTeamPage(repository: repository),
+                );
+              case Flota365Routes.managerEvidence:
+                return MaterialPageRoute(
+                  builder: (_) => ManagerEvidencePage(repository: repository),
+                );
+              case Flota365Routes.managerReports:
+                return MaterialPageRoute(
+                  builder: (_) => ManagerReportsPage(repository: repository),
                 );
               case Flota365Routes.managerDashboard:
                 return MaterialPageRoute(
@@ -168,13 +228,13 @@ class Flota365Module extends StatelessWidget {
               case Flota365Routes.checkOut:
                 return MaterialPageRoute(
                   builder: (_) =>
-                      CheckOutPage(onCompleted: () => Navigator.of(_).pop()),
+                      CheckOutPage(onCompleted: () => Navigator.of(context).pop()),
                 );
               case Flota365Routes.routes:
                 return MaterialPageRoute(
                   builder: (_) => RoutesOverviewPage(
                     repository: repository,
-                    onRouteSelected: (route) => Navigator.of(_).pushNamed(
+                    onRouteSelected: (route) => Navigator.of(context).pushNamed(
                       Flota365Routes.routeDetail,
                       arguments: route,
                     ),
