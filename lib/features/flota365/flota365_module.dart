@@ -76,12 +76,12 @@ class Flota365Module extends StatelessWidget {
                 return MaterialPageRoute(
                   builder: (_) => ManagerLoginPage(
                     onBackToSelection: () {
-                      Navigator.of(context).pop();
+                      Navigator.of(_).pop();
                     },
                     onLoginSuccess: () async {
                       await Future<void>.delayed(const Duration(milliseconds: 450));
-                      if (!context.mounted) return;
-                      Navigator.of(context).pushReplacementNamed(
+                      if (!_.mounted) return;
+                      Navigator.of(_).pushReplacementNamed(
                         Flota365Routes.managerDashboard,
                       );
                     },
@@ -147,6 +147,36 @@ class Flota365Module extends StatelessWidget {
                         Navigator.of(context).pushNamed(Flota365Routes.managerReports),
                     onSignOut: () {
                       Navigator.of(context).pushNamedAndRemoveUntil(
+                        Flota365Routes.welcome,
+                        (route) => false,
+                      );
+                    },
+                  ),
+                );
+              case Flota365Routes.managerTeam:
+                return MaterialPageRoute(
+                  builder: (_) => ManagerTeamPage(repository: repository),
+                );
+              case Flota365Routes.managerEvidence:
+                return MaterialPageRoute(
+                  builder: (_) => ManagerEvidencePage(repository: repository),
+                );
+              case Flota365Routes.managerReports:
+                return MaterialPageRoute(
+                  builder: (_) => ManagerReportsPage(repository: repository),
+                );
+              case Flota365Routes.managerDashboard:
+                return MaterialPageRoute(
+                  builder: (_) => ManagerDashboardPage(
+                    repository: repository,
+                    onOpenTeam: () =>
+                        Navigator.of(_).pushNamed(Flota365Routes.managerTeam),
+                    onOpenEvidence: () =>
+                        Navigator.of(_).pushNamed(Flota365Routes.managerEvidence),
+                    onOpenReports: () =>
+                        Navigator.of(_).pushNamed(Flota365Routes.managerReports),
+                    onSignOut: () {
+                      Navigator.of(_).pushNamedAndRemoveUntil(
                         Flota365Routes.welcome,
                         (route) => false,
                       );

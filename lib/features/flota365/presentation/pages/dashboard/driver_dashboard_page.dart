@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:easy_travel/features/flota365/data/fleet_repository.dart';
 import 'package:easy_travel/features/flota365/presentation/bloc/driver_session_cubit.dart';
 import 'package:easy_travel/features/flota365/presentation/widgets/dashboard_action_card.dart';
 import 'package:easy_travel/features/flota365/presentation/widgets/driver_flow_showcase.dart';
+import 'package:easy_travel/features/flota365/presentation/widgets/driver_navigation_drawer.dart';
 import 'package:easy_travel/features/flota365/presentation/widgets/route_progress_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -81,6 +84,106 @@ class DriverDashboardPage extends StatelessWidget {
     ];
 
     return Scaffold(
+      drawer: DriverNavigationDrawer(
+        driverName: driver.fullName,
+        driverLicense: driver.licenseNumber,
+        onOpenProfile: () {
+          Navigator.of(context).pop();
+          Future.microtask(() {
+            showModalBottomSheet<void>(
+              context: context,
+              showDragHandle: true,
+              builder: (sheetContext) {
+                return Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        driver.fullName,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text('ID del conductor: ${driver.id}'),
+                      Text('Licencia: ${driver.licenseNumber}'),
+                      const SizedBox(height: 12),
+                      Text('Correo de contacto: ${driver.email}'),
+                      const Text('Teléfono: No disponible en la demo'),
+                    ],
+                  ),
+                );
+              },
+            );
+          });
+        },
+        onOpenDashboard: () => Navigator.of(context).pop(),
+        onOpenCheckIn: () {
+          Navigator.of(context).pop();
+          onOpenCheckIn();
+        },
+        onOpenCheckOut: () {
+          Navigator.of(context).pop();
+          onOpenCheckOut();
+        },
+        onOpenRoutes: () {
+          Navigator.of(context).pop();
+          onOpenRoutes();
+        },
+        onOpenEvidence: () {
+          Navigator.of(context).pop();
+          onOpenEvidence();
+        },
+        onOpenHistory: () {
+          Navigator.of(context).pop();
+          onOpenHistory();
+        },
+        onOpenSupport: () {
+          Navigator.of(context).pop();
+          Future.microtask(() {
+            showModalBottomSheet<void>(
+              context: context,
+              showDragHandle: true,
+              builder: (sheetContext) {
+                return Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Contacto de soporte',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: 12),
+                      const ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Icon(Icons.phone),
+                        title: Text('+57 1 8000 123 456'),
+                        subtitle: Text('Línea de atención 24/7'),
+                      ),
+                      const ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Icon(Icons.mail_outline),
+                        title: Text('soporte@flota365.com'),
+                        subtitle: Text('Escríbenos para ayuda especializada'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          });
+        },
+        onSignOut: () {
+          Navigator.of(context).pop();
+          onSignOut();
+        },
+      ),
       appBar: AppBar(
         title: const Text('Dashboard'),
         actions: [
