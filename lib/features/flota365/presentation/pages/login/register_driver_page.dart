@@ -51,7 +51,7 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
               const SizedBox(height: 12),
               const _LabeledField(label: 'Número de licencia'),
               const SizedBox(height: 24),
-              FilledButton(
+              ElevatedButton(
                 onPressed: _isSubmitting ? null : _submit,
                 child: _isSubmitting
                     ? const SizedBox(

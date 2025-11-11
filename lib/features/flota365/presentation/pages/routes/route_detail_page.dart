@@ -53,7 +53,7 @@ class RouteDetailPage extends StatelessWidget {
             const SizedBox(height: 8),
             Text(route.notes),
             const SizedBox(height: 24),
-            FilledButton.icon(
+            ElevatedButton.icon(
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Ruta ${route.name} marcada como completada.')),

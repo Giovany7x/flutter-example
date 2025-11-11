@@ -55,7 +55,7 @@ class WelcomePage extends StatelessWidget {
               ),
               SizedBox(
                 width: double.infinity,
-                child: FilledButton(
+                child: ElevatedButton(
                   onPressed: onStart,
                   child: const Text('Comenzar'),
                 ),

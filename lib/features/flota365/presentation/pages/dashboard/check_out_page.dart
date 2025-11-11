@@ -60,7 +60,7 @@ class _CheckOutPageState extends State<CheckOutPage> {
                 maxLines: 3,
               ),
               const SizedBox(height: 24),
-              FilledButton(
+              ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState?.validate() ?? false) {
                     ScaffoldMessenger.of(context).showSnackBar(

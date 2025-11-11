@@ -70,7 +70,7 @@ class _DriverLoginPageState extends State<DriverLoginPage> {
                     value == null || value.isEmpty ? 'Ingresa tu contraseña' : null,
               ),
               const SizedBox(height: 24),
-              FilledButton(
+              ElevatedButton(
                 onPressed: isLoading ? null : _submit,
                 child: isLoading
                     ? const SizedBox(
