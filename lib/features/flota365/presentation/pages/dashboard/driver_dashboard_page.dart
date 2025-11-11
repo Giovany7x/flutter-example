@@ -173,32 +173,12 @@ class DriverDashboardPage extends StatelessWidget {
         },
       ),
       appBar: AppBar(
-        leadingWidth: 72,
         leading: Builder(
           builder: (context) {
-            return Padding(
-              padding: const EdgeInsets.only(left: 16.0),
-              child: _DriverQuickMenuButton(
-                onSelected: (option) => _handleQuickMenuSelection(
-                  context,
-                  option,
-                  onOpenCheckIn: onOpenCheckIn,
-                  onOpenCheckOut: onOpenCheckOut,
-                  onOpenRoutes: onOpenRoutes,
-                  onOpenNotifications: onOpenNotifications,
-                  onOpenEvidence: onOpenEvidence,
-                  onOpenHistory: onOpenHistory,
-                  onSignOut: onSignOut,
-                  onShowSupport: () => _showSupportSheet(context),
-                  onShowProfile: () => _showProfileSheet(
-                    context,
-                    driver.fullName,
-                    driver.id,
-                    driver.licenseNumber,
-                    driver.email,
-                  ),
-                ),
-              ),
+            return IconButton(
+              icon: const Icon(Icons.menu_rounded),
+              tooltip: 'Menú de navegación',
+              onPressed: () => Scaffold.of(context).openDrawer(),
             );
           },
         ),
