@@ -10,9 +10,10 @@ class TripHistoryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final averageRating = records.isEmpty
-        ? 0
-        : records.map((record) => record.rating).reduce((value, element) => value + element) /
-            records.length;
+    ? 0.0
+    : records.map((record) => record.rating.toDouble())
+        .reduce((value, element) => value + element) / records.length;
+
 
     return Scaffold(
       appBar: AppBar(

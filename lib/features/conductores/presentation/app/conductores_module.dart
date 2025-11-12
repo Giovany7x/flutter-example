@@ -41,7 +41,7 @@ class ConductoresModule extends StatelessWidget {
               case ConductoresRoutes.welcome:
                 return MaterialPageRoute(
                   builder: (_) => WelcomePage(
-                    onContinue: () => Navigator.of(_).pushReplacementNamed(
+                    onContinue: () => Navigator.of(context).pushReplacementNamed(
                       ConductoresRoutes.dashboard,
                     ),
                   ),
@@ -89,20 +89,20 @@ class ConductoresModule extends StatelessWidget {
               case ConductoresRoutes.checkIn:
                 return MaterialPageRoute(
                   builder: (_) => CheckInPage(
-                    onCompleted: () => Navigator.of(_).pop(),
+                    onCompleted: () => Navigator.of(context).pop(),
                   ),
                 );
               case ConductoresRoutes.checkOut:
                 return MaterialPageRoute(
                   builder: (_) => CheckOutPage(
-                    onCompleted: () => Navigator.of(_).pop(),
+                    onCompleted: () => Navigator.of(context).pop(),
                   ),
                 );
               case ConductoresRoutes.myRoutes:
                 return MaterialPageRoute(
                   builder: (_) => MyRoutesPage(
                     repository: repository,
-                    onRouteSelected: (route) => Navigator.of(_).pushNamed(
+                    onRouteSelected: (route) => Navigator.of(context).pushNamed(
                       ConductoresRoutes.routeDetail,
                       arguments: route,
                     ),
@@ -118,7 +118,7 @@ class ConductoresModule extends StatelessWidget {
                 return MaterialPageRoute(
                   builder: (_) => EvidenceCenterPage(
                     evidences: repository.getEvidenceRequirements(),
-                    onUploadRequested: () => Navigator.of(_).pop(),
+                    onUploadRequested: () => Navigator.of(context).pop(),
                   ),
                 );
               case ConductoresRoutes.history:
