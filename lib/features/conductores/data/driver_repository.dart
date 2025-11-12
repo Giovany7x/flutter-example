@@ -1,189 +1,311 @@
+import 'dart:convert';
+
+import 'package:easy_travel/core/constants/api_constants.dart';
+import 'package:easy_travel/features/conductores/data/models/driver_dashboard_data.dart';
 import 'package:easy_travel/features/conductores/domain/entities/check_item.dart';
 import 'package:easy_travel/features/conductores/domain/entities/driver_notification.dart';
 import 'package:easy_travel/features/conductores/domain/entities/driver_profile.dart';
 import 'package:easy_travel/features/conductores/domain/entities/driver_route.dart';
 import 'package:easy_travel/features/conductores/domain/entities/evidence_requirement.dart';
 import 'package:easy_travel/features/conductores/domain/entities/trip_record.dart';
+import 'package:http/http.dart' as http;
 
-/// Fuente de datos en memoria que simula la respuesta del backend.
+class ApiException implements Exception {
+  final String message;
+  final int? statusCode;
+
+  const ApiException(this.message, {this.statusCode});
+
+  @override
+  String toString() =>
+      'ApiException(statusCode: ${statusCode ?? 'unknown'}, message: $message)';
+}
+
 class DriverRepository {
-  DriverRepository._();
+  DriverRepository._({http.Client? client}) : _client = client ?? http.Client();
 
-  /// Instancia única reutilizable para mantener consistencia en los datos.
   static final DriverRepository instance = DriverRepository._();
 
-  /// Perfil del conductor autenticado en la demostración.
-  final DriverProfile demoDriver = const DriverProfile(
-    id: 'driver-001',
-    fullName: 'María Fernanda Pérez',
-    licenseNumber: 'L-472910',
-    email: 'maria.perez@flota365.com',
-    avatarUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=200',
-  );
+  final http.Client _client;
+  String? _authToken;
+  DriverProfile? _driver;
+  DriverDashboardData? _dashboardCache;
 
-  final List<DriverRoute> _routes = const [
-    DriverRoute(
-      id: 'route-001',
-      name: 'Ruta 27 - A05',
-      origin: 'Centro de distribución',
-      destination: 'Parque Industrial Norte',
-      schedule: '05:30 - 09:45',
-      status: 'En curso',
-      progress: 0.68,
-      nextStop: 'Caseta de seguridad',
-      eta: '09:40',
-      checkpoints: [
-        'Control vehicular',
-        'Planta de empaquetado',
-        'Caseta de seguridad',
-        'Entrega final',
-      ],
-    ),
-    DriverRoute(
-      id: 'route-002',
-      name: 'Ruta Express - B12',
-      origin: 'Terminal de carga',
-      destination: 'Zona portuaria',
-      schedule: '11:00 - 14:30',
-      status: 'Pendiente',
-      progress: 0.0,
-      nextStop: 'Control vehicular',
-      eta: '11:05',
-      checkpoints: [
-        'Control vehicular',
-        'Bodega 4',
-        'Punto de inspección',
-        'Zona portuaria',
-      ],
-    ),
-  ];
+  DriverProfile? get currentDriver => _driver;
 
-  final List<CheckItem> _checkInItems = const [
-    CheckItem(
-      id: 'ci-01',
-      title: 'Revisión visual del vehículo',
-      description: 'Confirma llantas, luces y carrocería en buen estado.',
-      isCritical: true,
-    ),
-    CheckItem(
-      id: 'ci-02',
-      title: 'Niveles de fluidos',
-      description: 'Combustible, aceite y refrigerante dentro de rango.',
-    ),
-    CheckItem(
-      id: 'ci-03',
-      title: 'Documentación del vehículo',
-      description: 'Tarjeta de propiedad y SOAT vigentes.',
-    ),
-    CheckItem(
-      id: 'ci-04',
-      title: 'Dispositivos de seguridad',
-      description: 'Botiquín, extintor y triángulos de seguridad disponibles.',
-    ),
-  ];
+  String? get authToken => _authToken;
 
-  final List<CheckItem> _checkOutItems = const [
-    CheckItem(
-      id: 'co-01',
-      title: 'Reporte de novedades',
-      description: 'Incluye incidentes o daños detectados durante la ruta.',
-      isCritical: true,
-    ),
-    CheckItem(
-      id: 'co-02',
-      title: 'Estado del combustible',
-      description: 'Registra nivel actual y adjunta soporte si aplica.',
-    ),
-    CheckItem(
-      id: 'co-03',
-      title: 'Kilometraje final',
-      description: 'Captura fotografía del odómetro al finalizar.',
-    ),
-    CheckItem(
-      id: 'co-04',
-      title: 'Entrega de llaves y equipos',
-      description: 'Confirma devolución al supervisor.',
-    ),
-  ];
+  Future<DriverProfile> signIn({
+    required String email,
+    required String password,
+  }) async {
+    final response = await _client.post(
+      _buildUri(ApiConstants.loginEndpoint),
+      headers: _defaultHeaders(includeAuth: false),
+      body: jsonEncode({'email': email, 'password': password}),
+    );
 
-  final List<EvidenceRequirement> _evidences = const [
-    EvidenceRequirement(
-      id: 'evi-01',
-      title: 'Foto del odómetro',
-      description: 'Captura el odómetro antes de iniciar y al terminar la ruta.',
-    ),
-    EvidenceRequirement(
-      id: 'evi-02',
-      title: 'Checklist firmado',
-      description: 'Adjunta el documento firmado por el supervisor.',
-    ),
-    EvidenceRequirement(
-      id: 'evi-03',
-      title: 'Comprobante de combustible',
-      description: 'Sube la factura o recibo de carga de combustible.',
-    ),
-  ];
+    final payload = _processResponse(response);
+    final driver = _extractDriver(payload);
 
-  final List<TripRecord> _history = const [
-    TripRecord(
-      id: 'trip-001',
-      routeName: 'Ruta 27 - A05',
-      date: '01 Jun 2024',
-      distanceKm: 48.5,
-      rating: 4.8,
-      feedback: 'Excelente puntualidad y comunicación con el cliente.',
-    ),
-    TripRecord(
-      id: 'trip-002',
-      routeName: 'Ruta Express - B12',
-      date: '29 May 2024',
-      distanceKm: 36.0,
-      rating: 4.5,
-      feedback: 'Entrega completada sin contratiempos.',
-    ),
-    TripRecord(
-      id: 'trip-003',
-      routeName: 'Ruta 14 - Centro',
-      date: '27 May 2024',
-      distanceKm: 52.7,
-      rating: 4.9,
-      feedback: 'Cliente satisfecho y ruta completada antes de lo programado.',
-    ),
-  ];
+    _driver = driver;
+    _authToken = _extractToken(payload, fallback: _authToken);
+    _dashboardCache = null;
 
-  final List<DriverNotification> _notifications = const [
-    DriverNotification(
-      id: 'notif-001',
-      title: 'Nueva ruta asignada',
-      description: 'Tienes una ruta prioritaria para el turno de la tarde.',
-      timeAgo: 'Hace 5 min',
-      isCritical: true,
-    ),
-    DriverNotification(
-      id: 'notif-002',
-      title: 'Checklist pendiente',
-      description: 'Recuerda completar el check-in antes de las 06:00 hrs.',
-      timeAgo: 'Hace 20 min',
-    ),
-    DriverNotification(
-      id: 'notif-003',
-      title: 'Evidencia aprobada',
-      description: 'Tu comprobante de combustible fue validado.',
-      timeAgo: 'Hace 1 h',
-    ),
-  ];
+    return driver;
+  }
 
-  List<DriverRoute> getRoutesForDriver(String driverId) => _routes;
+  Future<DriverProfile> register({
+    required String fullName,
+    required String email,
+    required String password,
+    required String licenseNumber,
+  }) async {
+    final response = await _client.post(
+      _buildUri(ApiConstants.registerEndpoint),
+      headers: _defaultHeaders(includeAuth: false),
+      body: jsonEncode({
+        'fullName': fullName,
+        'email': email,
+        'password': password,
+        'licenseNumber': licenseNumber,
+      }),
+    );
 
-  DriverRoute getHighlightedRoute(String driverId) => _routes.first;
+    final payload = _processResponse(response);
+    final driver = _extractDriver(payload);
 
-  List<CheckItem> getCheckInChecklist() => _checkInItems;
+    _driver = driver;
+    _authToken = _extractToken(payload, fallback: _authToken);
+    _dashboardCache = null;
 
-  List<CheckItem> getCheckOutChecklist() => _checkOutItems;
+    return driver;
+  }
 
-  List<EvidenceRequirement> getEvidenceRequirements() => _evidences;
+  Future<DriverProfile> refreshProfile({String? driverId}) async {
+    final id = driverId ?? _driver?.id;
+    if (id == null) {
+      throw const ApiException('No hay conductor autenticado para consultar.');
+    }
 
-  List<TripRecord> getTripHistory() => _history;
+    final response = await _client.get(
+      _buildUri(ApiConstants.driverProfileEndpoint, pathParameters: {'driverId': id}),
+      headers: _defaultHeaders(),
+    );
 
-  List<DriverNotification> getNotifications() => _notifications;
+    final payload = _processResponse(response);
+    final driver = _extractDriver(payload);
+
+    _driver = driver;
+    return driver;
+  }
+
+  Future<void> signOut() async {
+    _authToken = null;
+    _driver = null;
+    _dashboardCache = null;
+  }
+
+  Future<DriverDashboardData> fetchDashboard({
+    String? driverId,
+    bool forceRefresh = false,
+  }) async {
+    final id = driverId ?? _driver?.id;
+    if (id == null) {
+      throw const ApiException('No se encontró un identificador de conductor.');
+    }
+
+    if (!forceRefresh && _dashboardCache != null) {
+      return _dashboardCache!;
+    }
+
+    final response = await _client.get(
+      _buildUri(ApiConstants.driverDashboardEndpoint, pathParameters: {'driverId': id}),
+      headers: _defaultHeaders(),
+    );
+
+    final payload = _processResponse(response);
+    final dashboardJson = _unwrapDashboard(payload);
+
+    final data = DriverDashboardData.fromJson(dashboardJson);
+    _dashboardCache = data;
+    return data;
+  }
+
+  Future<List<DriverRoute>> getRoutesForDriver({
+    String? driverId,
+    bool forceRefresh = false,
+  }) async {
+    final dashboard = await fetchDashboard(
+      driverId: driverId,
+      forceRefresh: forceRefresh,
+    );
+    return dashboard.routes;
+  }
+
+  Future<DriverRoute?> getHighlightedRoute({
+    String? driverId,
+    bool forceRefresh = false,
+  }) async {
+    final dashboard = await fetchDashboard(
+      driverId: driverId,
+      forceRefresh: forceRefresh,
+    );
+    return dashboard.highlightedRoute;
+  }
+
+  Future<List<CheckItem>> getCheckInChecklist({bool forceRefresh = false}) async {
+    final dashboard = await fetchDashboard(forceRefresh: forceRefresh);
+    return dashboard.checkInChecklist;
+  }
+
+  Future<List<CheckItem>> getCheckOutChecklist({bool forceRefresh = false}) async {
+    final dashboard = await fetchDashboard(forceRefresh: forceRefresh);
+    return dashboard.checkOutChecklist;
+  }
+
+  Future<List<EvidenceRequirement>> getEvidenceRequirements({
+    bool forceRefresh = false,
+  }) async {
+    final dashboard = await fetchDashboard(forceRefresh: forceRefresh);
+    return dashboard.evidences;
+  }
+
+  Future<List<TripRecord>> getTripHistory({bool forceRefresh = false}) async {
+    final dashboard = await fetchDashboard(forceRefresh: forceRefresh);
+    return dashboard.tripHistory;
+  }
+
+  Future<List<DriverNotification>> getNotifications({
+    bool forceRefresh = false,
+  }) async {
+    final dashboard = await fetchDashboard(forceRefresh: forceRefresh);
+    return dashboard.notifications;
+  }
+
+  Uri _buildUri(
+    String endpoint, {
+    Map<String, String>? pathParameters,
+    Map<String, dynamic>? queryParameters,
+  }) {
+    var sanitized = endpoint.trim();
+    if (!sanitized.startsWith('/')) {
+      sanitized = '/$sanitized';
+    }
+
+    pathParameters?.forEach((key, value) {
+      sanitized = sanitized.replaceAll('{${key}}', value);
+    });
+
+    final base = ApiConstants.baseUrl.endsWith('/')
+        ? ApiConstants.baseUrl.substring(0, ApiConstants.baseUrl.length - 1)
+        : ApiConstants.baseUrl;
+
+    final uri = Uri.parse('$base$sanitized');
+
+    if (queryParameters == null || queryParameters.isEmpty) {
+      return uri;
+    }
+
+    final qp = queryParameters.map((key, value) => MapEntry(key, value.toString()));
+    return uri.replace(queryParameters: qp);
+  }
+
+  Map<String, String> _defaultHeaders({bool includeAuth = true}) => {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        if (includeAuth && _authToken != null) 'Authorization': 'Bearer $_authToken',
+      };
+
+  Map<String, dynamic> _processResponse(http.Response response) {
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      final message = _extractErrorMessage(response.body) ??
+          'Error de red (${response.statusCode}).';
+      throw ApiException(message, statusCode: response.statusCode);
+    }
+
+    if (response.body.isEmpty) {
+      return const {};
+    }
+
+    final decoded = jsonDecode(response.body);
+    if (decoded is Map<String, dynamic>) {
+      return decoded;
+    }
+    if (decoded is List) {
+      return {'items': decoded};
+    }
+
+    return const {};
+  }
+
+  Map<String, dynamic> _unwrapDashboard(Map<String, dynamic> payload) {
+    final data = _unwrapEnvelope(payload);
+    if (data['dashboard'] is Map<String, dynamic>) {
+      return Map<String, dynamic>.from(data['dashboard'] as Map<String, dynamic>);
+    }
+    if (data['items'] is Map<String, dynamic>) {
+      return Map<String, dynamic>.from(data['items'] as Map<String, dynamic>);
+    }
+    if (data['data'] is Map<String, dynamic>) {
+      return Map<String, dynamic>.from(data['data'] as Map<String, dynamic>);
+    }
+
+    return data;
+  }
+
+  Map<String, dynamic> _unwrapEnvelope(Map<String, dynamic> payload) {
+    if (payload['data'] is Map<String, dynamic>) {
+      return Map<String, dynamic>.from(payload['data'] as Map<String, dynamic>);
+    }
+    if (payload['result'] is Map<String, dynamic>) {
+      return Map<String, dynamic>.from(payload['result'] as Map<String, dynamic>);
+    }
+    return payload;
+  }
+
+  DriverProfile _extractDriver(Map<String, dynamic> payload) {
+    final data = _unwrapEnvelope(payload);
+    final driverJson = <String, dynamic>{}
+      ..addAll(data['driver'] is Map<String, dynamic>
+          ? Map<String, dynamic>.from(data['driver'] as Map<String, dynamic>)
+          : {})
+      ..addAll(data['user'] is Map<String, dynamic>
+          ? Map<String, dynamic>.from(data['user'] as Map<String, dynamic>)
+          : {})
+      ..addAll(data['profile'] is Map<String, dynamic>
+          ? Map<String, dynamic>.from(data['profile'] as Map<String, dynamic>)
+          : {});
+
+    if (driverJson.isEmpty) {
+      driverJson.addAll(data);
+    }
+
+    return DriverProfile.fromJson(driverJson);
+  }
+
+  String? _extractToken(Map<String, dynamic> payload, {String? fallback}) {
+    final data = _unwrapEnvelope(payload);
+    return data['token'] as String? ??
+        data['accessToken'] as String? ??
+        data['jwt'] as String? ??
+        fallback;
+  }
+
+  String? _extractErrorMessage(String body) {
+    if (body.isEmpty) {
+      return null;
+    }
+    try {
+      final decoded = jsonDecode(body);
+      if (decoded is Map<String, dynamic>) {
+        return decoded['message'] as String? ??
+            decoded['error'] as String? ??
+            decoded['detail'] as String?;
+      }
+    } catch (_) {
+      return null;
+    }
+    return null;
+  }
 }

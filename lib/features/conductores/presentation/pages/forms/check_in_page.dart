@@ -13,17 +13,16 @@ class CheckInPage extends StatefulWidget {
 
 class _CheckInPageState extends State<CheckInPage> {
   final repository = DriverRepository.instance;
-  late final List<CheckItem> checklist;
+  late Future<List<CheckItem>> _checklistFuture;
   final Map<String, bool> selections = {};
   final TextEditingController notesController = TextEditingController();
+  List<CheckItem> _checklist = const [];
+  bool _initialized = false;
 
   @override
   void initState() {
     super.initState();
-    checklist = repository.getCheckInChecklist();
-    for (final item in checklist) {
-      selections[item.id] = false;
-    }
+    _checklistFuture = repository.getCheckInChecklist();
   }
 
   @override
@@ -36,86 +35,146 @@ class _CheckInPageState extends State<CheckInPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Check-In vehicular'),
-        centerTitle: false,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Row(
+    return FutureBuilder<List<CheckItem>>(
+      future: _checklistFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasError) {
+          final message = snapshot.error is ApiException
+              ? (snapshot.error as ApiException).message
+              : 'No pudimos obtener la lista de verificación.';
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Check-In vehicular'),
+              centerTitle: false,
+            ),
+            body: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF27AE60).withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: const Icon(Icons.directions_car_filled_rounded, color: Color(0xFF27AE60)),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Checklist del turno', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 4),
-                        Text('Confirma los puntos críticos antes de iniciar la ruta.',
-                            style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[700])),
-                      ],
-                    ),
+                  Text(message, textAlign: TextAlign.center),
+                  const SizedBox(height: 16),
+                  FilledButton(
+                    onPressed: () {
+                      setState(() {
+                        _initialized = false;
+                        _checklistFuture = repository.getCheckInChecklist(forceRefresh: true);
+                      });
+                    },
+                    child: const Text('Reintentar'),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-            Expanded(
-              child: ListView.separated(
-                itemCount: checklist.length + 1,
-                separatorBuilder: (_, __) => const SizedBox(height: 16),
-                itemBuilder: (context, index) {
-                  if (index == checklist.length) {
-                    return _NotesCard(controller: notesController);
-                  }
-                  final item = checklist[index];
-                  return _ChecklistTile(
-                    item: item,
-                    value: selections[item.id]!,
-                    onChanged: (value) {
-                      setState(() {
-                        selections[item.id] = value ?? false;
-                      });
+          );
+        }
+
+        final items = snapshot.data ?? const <CheckItem>[];
+        _initializeChecklist(items);
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Check-In vehicular'),
+            centerTitle: false,
+          ),
+          body: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF27AE60).withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: const Icon(Icons.directions_car_filled_rounded, color: Color(0xFF27AE60)),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Checklist del turno',
+                                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Confirma los puntos críticos antes de iniciar la ruta.',
+                              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: _checklist.length + 1,
+                    separatorBuilder: (_, __) => const SizedBox(height: 16),
+                    itemBuilder: (context, index) {
+                      if (index == _checklist.length) {
+                        return _NotesCard(controller: notesController);
+                      }
+                      final item = _checklist[index];
+                      return _ChecklistTile(
+                        item: item,
+                        value: selections[item.id] ?? false,
+                        onChanged: (value) {
+                          setState(() {
+                            selections[item.id] = value ?? false;
+                          });
+                        },
+                      );
                     },
-                  );
-                },
-              ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SafeArea(
+                  top: false,
+                  child: FilledButton.icon(
+                    onPressed: _canSubmit ? widget.onCompleted : null,
+                    icon: const Icon(Icons.check_circle_rounded),
+                    label: const Text('Completar Check-In'),
+                    style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
             ),
-            const SizedBox(height: 16),
-            SafeArea(
-              top: false,
-              child: FilledButton.icon(
-                onPressed: _canSubmit ? widget.onCompleted : null,
-                icon: const Icon(Icons.check_circle_rounded),
-                label: const Text('Completar Check-In'),
-                style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
-              ),
-            ),
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
-  bool get _canSubmit => selections.values.every((value) => value);
+  void _initializeChecklist(List<CheckItem> items) {
+    if (_initialized) {
+      return;
+    }
+    _checklist = items;
+    selections
+      ..clear()
+      ..addEntries(items.map((item) => MapEntry(item.id, selections[item.id] ?? false)));
+    _initialized = true;
+  }
+
+  bool get _canSubmit =>
+      _checklist.isNotEmpty && selections.values.every((value) => value);
 }
 
 class _ChecklistTile extends StatelessWidget {
