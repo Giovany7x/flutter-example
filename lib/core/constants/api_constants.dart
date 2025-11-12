@@ -1,7 +1,10 @@
 class ApiConstants {
   static const String baseUrl =
-      'https://destinationapp-h4e8dvace3fqffbb.eastus-01.azurewebsites.net';
-  static const String destinationsEndpoint = '/api/destinations';
-  static const String loginEndpoint = 'api/users/login';
-  static const String registerEndpoint = 'api/users/register';
+      'https://underground-tuesday-renworkplace-1e2821cb.koyeb.app';
+
+  static const String loginEndpoint = '/api/Auth/login';
+  static const String registerEndpoint = '/api/Auth/register';
+  static const String driverProfileEndpoint = '/api/Drivers/{driverId}';
+  static const String driverDashboardEndpoint =
+      '/api/Drivers/{driverId}/dashboard';
 }

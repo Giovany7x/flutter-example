@@ -1,38 +1,114 @@
+import 'package:easy_travel/features/conductores/data/driver_repository.dart';
 import 'package:easy_travel/features/conductores/domain/entities/trip_record.dart';
 import 'package:easy_travel/features/conductores/presentation/widgets/trip_history_tile.dart';
 import 'package:flutter/material.dart';
 
-class TripHistoryPage extends StatelessWidget {
-  final List<TripRecord> records;
+class TripHistoryPage extends StatefulWidget {
+  final DriverRepository repository;
 
-  const TripHistoryPage({super.key, required this.records});
+  const TripHistoryPage({super.key, required this.repository});
+
+  @override
+  State<TripHistoryPage> createState() => _TripHistoryPageState();
+}
+
+class _TripHistoryPageState extends State<TripHistoryPage> {
+  late Future<List<TripRecord>> _historyFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _historyFuture = widget.repository.getTripHistory();
+  }
+
+  void _retry() {
+    setState(() {
+      _historyFuture = widget.repository.getTripHistory(forceRefresh: true);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final averageRating = records.isEmpty
-    ? 0.0
-    : records.map((record) => record.rating.toDouble())
-        .reduce((value, element) => value + element) / records.length;
+    return FutureBuilder<List<TripRecord>>(
+      future: _historyFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Historial de viajes'),
-        centerTitle: false,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 120),
-        children: [
-          _SummaryHeader(totalTrips: records.length, averageRating: averageRating),
-          const SizedBox(height: 24),
-          ...records.map(
-            (record) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: TripHistoryTile(record: record),
+        if (snapshot.hasError) {
+          final message = snapshot.error is ApiException
+              ? (snapshot.error as ApiException).message
+              : 'No pudimos cargar el historial.';
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Historial de viajes'),
+              centerTitle: false,
             ),
+            body: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(message, textAlign: TextAlign.center),
+                  const SizedBox(height: 16),
+                  FilledButton(
+                    onPressed: _retry,
+                    child: const Text('Reintentar'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        final records = snapshot.data ?? const <TripRecord>[];
+        final averageRating = records.isEmpty
+            ? 0.0
+            : records
+                    .map((record) => record.rating.toDouble())
+                    .reduce((value, element) => value + element) /
+                records.length;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Historial de viajes'),
+            centerTitle: false,
           ),
-        ],
-      ),
+          body: RefreshIndicator(
+            onRefresh: () async {
+              _retry();
+              await _historyFuture;
+            },
+            child: records.isEmpty
+                ? ListView(
+                    padding: const EdgeInsets.all(24),
+                    children: const [
+                      SizedBox(height: 120),
+                      Center(child: Text('Sin viajes registrados aún.')),
+                    ],
+                  )
+                : ListView(
+                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 120),
+                    children: [
+                      _SummaryHeader(
+                        totalTrips: records.length,
+                        averageRating: averageRating,
+                      ),
+                      const SizedBox(height: 24),
+                      ...records.map(
+                        (record) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: TripHistoryTile(record: record),
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        );
+      },
     );
   }
 }
